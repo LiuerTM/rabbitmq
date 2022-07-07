@@ -1,6 +1,5 @@
-package ind.liuer.rabbitmq.base.routing;
+package ind.liuer.rabbitmq.base.pubconfirm;
 
-import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import ind.liuer.rabbitmq.support.RabbitMQUtil;
 import org.slf4j.Logger;
@@ -13,31 +12,20 @@ import java.util.Optional;
 /**
  * @author Mingの
  */
-public class ReceiveLogDirect {
+public class PubConfirmConsumer {
 
-    public static final Logger log = LoggerFactory.getLogger(ReceiveLogDirect.class);
+    public static final Logger log = LoggerFactory.getLogger(PubConfirmConsumer.class);
 
-    public static final String EXCHANGE_NAME = "base.direct_log";
+    public static final String QUEUE_NAME = "base.confirm";
 
     public static void main(String[] args) throws IOException {
         Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
-
-            channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
-
-            String queueName = channel.queueDeclare().getQueue();
-
-            String[] strings = new String[]{"error"};
-//            String[] strings = new String[]{"info", "warning", "error"};
-            for (String str : strings) {
-                channel.queueBind(queueName, EXCHANGE_NAME, str);
-            }
-
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
             log.info("Waiting for message.....");
-
             channel.basicConsume(
-                queueName,
+                QUEUE_NAME,
                 true,
                 (consumerTag, message) -> {
                     String msg = new String(message.getBody(), StandardCharsets.UTF_8);

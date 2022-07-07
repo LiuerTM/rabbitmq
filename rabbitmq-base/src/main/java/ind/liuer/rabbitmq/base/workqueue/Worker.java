@@ -1,7 +1,6 @@
 package ind.liuer.rabbitmq.base.workqueue;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Delivery;
 import ind.liuer.rabbitmq.support.RabbitMQUtil;
 import ind.liuer.rabbitmq.support.SleepUtil;
 import org.slf4j.Logger;

@@ -13,9 +13,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Mingの
  */
-public class PubConfirmSingle {
+public class PubConfirmBatch {
 
-    public static final Logger log = LoggerFactory.getLogger(PubConfirmSingle.class);
+    public static final Logger log = LoggerFactory.getLogger(PubConfirmBatch.class);
 
     public static final String QUEUE_NAME = "base.confirm";
 
@@ -24,22 +24,23 @@ public class PubConfirmSingle {
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
-            // Enabling Publisher Confirms on a Channel
             channel.confirmSelect();
 
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 5000; i++) {
+            for (int i = 0; i < 50000; i++) {
                 channel.basicPublish("", QUEUE_NAME, null, ("Confirm Message - " + i).getBytes(StandardCharsets.UTF_8));
 
-                // Confirm, uses a five seconds timeout
-                channel.waitForConfirmsOrDie(5000);
+                if (i > 0 && i % 1000 == 0) {
+                    channel.waitForConfirmsOrDie(5000);
+                }
             }
+            channel.waitForConfirmsOrDie(5000);
             long stop = System.currentTimeMillis();
 
-            log.info("Published 5000 messages individually in {} ms", (stop - start));
-            log.info("Sent 5000 messages successfully");
+            log.info("Published 50000 messages individually in {} ms", (stop - start));
+            log.info("Sent 50000 messages successfully");
 
             RabbitMQUtil.close(channel);
         }

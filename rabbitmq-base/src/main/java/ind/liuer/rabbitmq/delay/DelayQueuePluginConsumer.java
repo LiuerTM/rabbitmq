@@ -1,6 +1,5 @@
-package ind.liuer.rabbitmq.base.routing;
+package ind.liuer.rabbitmq.delay;
 
-import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import ind.liuer.rabbitmq.support.RabbitMQUtil;
 import org.slf4j.Logger;
@@ -8,36 +7,36 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * @author Mingの
  */
-public class ReceiveLogDirect {
+public class DelayQueuePluginConsumer {
 
-    public static final Logger log = LoggerFactory.getLogger(ReceiveLogDirect.class);
+    public static final Logger log = LoggerFactory.getLogger(DelayQueuePluginConsumer.class);
 
-    public static final String EXCHANGE_NAME = "base.direct_log";
+    public static final String DELAY_PLUGIN_EXCHANGE = "delay.plugin.exchange";
+
+    public static final String DELAY_PLUGIN_QUEUE = "delay.plugin.queue";
 
     public static void main(String[] args) throws IOException {
         Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
-            channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
-
-            String queueName = channel.queueDeclare().getQueue();
-
-            String[] strings = new String[]{"error"};
-//            String[] strings = new String[]{"info", "warning", "error"};
-            for (String str : strings) {
-                channel.queueBind(queueName, EXCHANGE_NAME, str);
-            }
+            Map<String, Object> arguments = new HashMap<>();
+            arguments.put("x-delayed-type", "direct");
+            channel.exchangeDeclare(DELAY_PLUGIN_EXCHANGE, "x-delayed-message", false, false, arguments);
+            channel.queueDeclare(DELAY_PLUGIN_QUEUE, false, false, false, null);
+            channel.queueBind(DELAY_PLUGIN_QUEUE, DELAY_PLUGIN_EXCHANGE, DELAY_PLUGIN_QUEUE);
 
             log.info("Waiting for message.....");
 
             channel.basicConsume(
-                queueName,
+                DELAY_PLUGIN_QUEUE,
                 true,
                 (consumerTag, message) -> {
                     String msg = new String(message.getBody(), StandardCharsets.UTF_8);
