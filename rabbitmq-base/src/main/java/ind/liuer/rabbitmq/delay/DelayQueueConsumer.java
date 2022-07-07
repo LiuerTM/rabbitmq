@@ -2,7 +2,7 @@ package ind.liuer.rabbitmq.delay;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +25,11 @@ public class DelayQueueConsumer {
     public static final String DEAD_QUEUE = "base.dead";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
-            Map<String, Object> arguments = new HashMap<>();
+            Map<String, Object> arguments = new HashMap<>(16);
             arguments.put("x-dead-letter-exchange", DEAD_EXCHANGE);
             arguments.put("x-dead-letter-routing-key", DEAD_QUEUE);
             arguments.put("x-message-ttl", 10000);
@@ -42,14 +42,14 @@ public class DelayQueueConsumer {
             log.info("Waiting for message....");
 
             channel.basicConsume(
-                DELAY_QUEUE,
-                true,
-                (consumerTag, message) -> {
-                    String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-                    log.info("Received a message: {}", msg);
-                },
-                consumerTag -> {
-                }
+                    DELAY_QUEUE,
+                    true,
+                    (consumerTag, message) -> {
+                        String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+                        log.info("Received a message: {}", msg);
+                    },
+                    consumerTag -> {
+                    }
             );
         }
     }

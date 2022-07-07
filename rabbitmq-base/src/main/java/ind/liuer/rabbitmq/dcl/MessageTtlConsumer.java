@@ -3,7 +3,7 @@ package ind.liuer.rabbitmq.dcl;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,14 +27,14 @@ public class MessageTtlConsumer {
     public static final String DEAD_QUEUE = "base.dead";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
             channel.exchangeDeclare(NORMAL_EXCHANGE, BuiltinExchangeType.DIRECT);
             channel.exchangeDeclare(DEAD_EXCHANGE, BuiltinExchangeType.DIRECT);
 
-            Map<String, Object> arguments = new HashMap<>();
+            Map<String, Object> arguments = new HashMap<>(16);
             arguments.put("x-dead-letter-exchange", DEAD_EXCHANGE);
             arguments.put("x-dead-letter-routing-key", DEAD_QUEUE);
             channel.queueDeclare(NORMAL_QUEUE, false, false, false, arguments);

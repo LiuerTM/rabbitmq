@@ -1,7 +1,7 @@
 package ind.liuer.rabbitmq.base.helloworld;
 
 import com.rabbitmq.client.Channel;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class Receive {
     public static final String QUEUE_NAME = "base.hello";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
@@ -35,14 +35,14 @@ public class Receive {
              * - cancelCallback   取消回调
              */
             channel.basicConsume(
-                QUEUE_NAME,
-                true,
-                (consumerTag, message) -> {
-                    String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-                    log.info("Received a message: {}", msg);
-                },
-                consumerTag -> {
-                }
+                    QUEUE_NAME,
+                    true,
+                    (consumerTag, message) -> {
+                        String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+                        log.info("Received a message: {}", msg);
+                    },
+                    consumerTag -> {
+                    }
             );
         }
     }

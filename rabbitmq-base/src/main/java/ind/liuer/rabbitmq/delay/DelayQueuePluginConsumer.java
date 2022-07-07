@@ -1,7 +1,7 @@
 package ind.liuer.rabbitmq.delay;
 
 import com.rabbitmq.client.Channel;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +23,11 @@ public class DelayQueuePluginConsumer {
     public static final String DELAY_PLUGIN_QUEUE = "delay.plugin.queue";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
-            Map<String, Object> arguments = new HashMap<>();
+            Map<String, Object> arguments = new HashMap<>(16);
             arguments.put("x-delayed-type", "direct");
             channel.exchangeDeclare(DELAY_PLUGIN_EXCHANGE, "x-delayed-message", false, false, arguments);
             channel.queueDeclare(DELAY_PLUGIN_QUEUE, false, false, false, null);
@@ -36,14 +36,14 @@ public class DelayQueuePluginConsumer {
             log.info("Waiting for message.....");
 
             channel.basicConsume(
-                DELAY_PLUGIN_QUEUE,
-                true,
-                (consumerTag, message) -> {
-                    String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-                    log.info("Received a message: {}", msg);
-                },
-                consumerTag -> {
-                }
+                    DELAY_PLUGIN_QUEUE,
+                    true,
+                    (consumerTag, message) -> {
+                        String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+                        log.info("Received a message: {}", msg);
+                    },
+                    consumerTag -> {
+                    }
             );
         }
     }

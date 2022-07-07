@@ -1,7 +1,7 @@
 package ind.liuer.rabbitmq.base.pubconfirm;
 
 import com.rabbitmq.client.Channel;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class PubConfirmSingle {
     public static final String QUEUE_NAME = "base.confirm";
 
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
@@ -30,7 +30,8 @@ public class PubConfirmSingle {
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 5000; i++) {
+            int messageCount = 5000;
+            for (int i = 0; i < messageCount; i++) {
                 channel.basicPublish("", QUEUE_NAME, null, ("Confirm Message - " + i).getBytes(StandardCharsets.UTF_8));
 
                 // Confirm, uses a five seconds timeout
@@ -41,7 +42,7 @@ public class PubConfirmSingle {
             log.info("Published 5000 messages individually in {} ms", (stop - start));
             log.info("Sent 5000 messages successfully");
 
-            RabbitMQUtil.close(channel);
+            RabbitMqUtil.close(channel);
         }
     }
 }

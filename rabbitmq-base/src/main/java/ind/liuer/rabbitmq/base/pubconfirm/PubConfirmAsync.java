@@ -2,7 +2,7 @@ package ind.liuer.rabbitmq.base.pubconfirm;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConfirmCallback;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,24 +21,24 @@ public class PubConfirmAsync {
 
     public static final String QUEUE_NAME = "base.confirm";
 
-    private static final ConcurrentNavigableMap<Long, String> requireConfirm = new ConcurrentSkipListMap<>();
+    private static final ConcurrentNavigableMap<Long, String> REQUIRE_CONFIRM = new ConcurrentSkipListMap<>();
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
             channel.confirmSelect();
 
             ConfirmCallback cleanConfirmed = (deliveryTag, multiple) -> {
                 if (multiple) {
-                    ConcurrentNavigableMap<Long, String> confirmed = requireConfirm.headMap(deliveryTag, true);
+                    ConcurrentNavigableMap<Long, String> confirmed = REQUIRE_CONFIRM.headMap(deliveryTag, true);
                     confirmed.clear();
                 } else {
-                    requireConfirm.remove(deliveryTag);
+                    REQUIRE_CONFIRM.remove(deliveryTag);
                 }
             };
             ConfirmCallback handleNack = (deliveryTag, multiple) -> {
-                String msg = requireConfirm.get(deliveryTag);
+                String msg = REQUIRE_CONFIRM.get(deliveryTag);
                 log.error("Message with body {} has been nack-ed. Sequence number: {}, multiple: {}", msg, deliveryTag, msg);
                 cleanConfirmed.handle(deliveryTag, multiple);
             };
@@ -47,10 +47,11 @@ public class PubConfirmAsync {
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 50000; i++) {
+            int messageCount = 50000;
+            for (int i = 0; i < messageCount; i++) {
                 long sequenceNumber = channel.getNextPublishSeqNo();
                 String msg = "Confirm Message - " + sequenceNumber;
-                requireConfirm.put(sequenceNumber, msg);
+                REQUIRE_CONFIRM.put(sequenceNumber, msg);
                 channel.basicPublish("", QUEUE_NAME, null, msg.getBytes(StandardCharsets.UTF_8));
             }
             long stop = System.currentTimeMillis();
@@ -58,7 +59,7 @@ public class PubConfirmAsync {
             log.info("Published 50000 messages individually in {} ms", (stop - start));
             log.info("Sent 50000 messages successfully");
 
-            RabbitMQUtil.close(channel);
+            RabbitMqUtil.close(channel);
         }
     }
 }

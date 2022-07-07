@@ -15,23 +15,23 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Mingの
  */
-public class RabbitMQUtil {
+public class RabbitMqUtil {
 
-    public static final Logger log = LoggerFactory.getLogger(RabbitMQUtil.class);
+    public static final Logger log = LoggerFactory.getLogger(RabbitMqUtil.class);
 
-    private static final Properties properties = new Properties();
-    private static final String host;
-    private static final String username;
-    private static final String password;
+    private static final Properties PROPERTIES = new Properties();
+    private static final String HOST;
+    private static final String USERNAME;
+    private static final String PASSWORD;
 
     static {
         InputStream resourceAsStream = Thread.currentThread()
-            .getContextClassLoader().getResourceAsStream("rabbitmq-db.properties");
+                .getContextClassLoader().getResourceAsStream("rabbitmq-db.properties");
         try {
-            properties.load(resourceAsStream);
-            host = properties.getProperty("rabbitmq.host");
-            username = properties.getProperty("rabbitmq.username");
-            password = properties.getProperty("rabbitmq.password");
+            PROPERTIES.load(resourceAsStream);
+            HOST = PROPERTIES.getProperty("rabbitmq.host");
+            USERNAME = PROPERTIES.getProperty("rabbitmq.username");
+            PASSWORD = PROPERTIES.getProperty("rabbitmq.password");
         } catch (IOException e) {
             log.error("Initialize RabbitMQ connection information failed. Cause: {}", e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
@@ -41,9 +41,9 @@ public class RabbitMQUtil {
     public static Optional<Connection> getConnection() {
         Optional<Connection> connOpt = Optional.empty();
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setUsername(username);
-        factory.setPassword(password);
+        factory.setHost(HOST);
+        factory.setUsername(USERNAME);
+        factory.setPassword(PASSWORD);
         try {
             connOpt = Optional.ofNullable(factory.newConnection());
         } catch (IOException | TimeoutException e) {

@@ -2,7 +2,7 @@ package ind.liuer.rabbitmq.base.workqueue;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class Leader {
     public static final String TASK_NAME = "base.task";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
@@ -28,18 +28,19 @@ public class Leader {
             channel.queueDeclare(TASK_NAME, true, false, false, null);
 
             // Publish a persistent message
-            for (int i = 0; i < 10; i++) {
+            int messageCount = 10;
+            for (int i = 0; i < messageCount; i++) {
                 channel.basicPublish(
-                    "",
-                    TASK_NAME,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    ("Task" + " - " + i).getBytes(StandardCharsets.UTF_8)
+                        "",
+                        TASK_NAME,
+                        MessageProperties.PERSISTENT_TEXT_PLAIN,
+                        ("Task" + " - " + i).getBytes(StandardCharsets.UTF_8)
                 );
 
                 log.info("Sent a task successfully");
             }
 
-            RabbitMQUtil.close(channel);
+            RabbitMqUtil.close(channel);
         }
     }
 }

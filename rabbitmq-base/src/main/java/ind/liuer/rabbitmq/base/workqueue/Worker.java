@@ -1,7 +1,7 @@
 package ind.liuer.rabbitmq.base.workqueue;
 
 import com.rabbitmq.client.Channel;
-import ind.liuer.rabbitmq.support.RabbitMQUtil;
+import ind.liuer.rabbitmq.support.RabbitMqUtil;
 import ind.liuer.rabbitmq.support.SleepUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class Worker {
     public static final String QUEUE_NAME = "base.task";
 
     public static void main(String[] args) throws IOException {
-        Optional<Channel> channelOpt = RabbitMQUtil.getChannel();
+        Optional<Channel> channelOpt = RabbitMqUtil.getChannel();
         if (channelOpt.isPresent()) {
             Channel channel = channelOpt.get();
 
@@ -32,20 +32,20 @@ public class Worker {
 
             // Message not acknowledgment
             channel.basicConsume(
-                QUEUE_NAME,
-                false,
-                (consumerTag, message) -> {
-                    String task = new String(message.getBody(), StandardCharsets.UTF_8);
-                    log.info("Received a task: {}", task);
-                    try {
-                        doWork(task);
-                    } finally {
-                        log.info("Done");
-                        channel.basicAck(message.getEnvelope().getDeliveryTag(), false);
+                    QUEUE_NAME,
+                    false,
+                    (consumerTag, message) -> {
+                        String task = new String(message.getBody(), StandardCharsets.UTF_8);
+                        log.info("Received a task: {}", task);
+                        try {
+                            doWork(task);
+                        } finally {
+                            log.info("Done");
+                            channel.basicAck(message.getEnvelope().getDeliveryTag(), false);
+                        }
+                    },
+                    consumerTag -> {
                     }
-                },
-                consumerTag -> {
-                }
             );
         }
     }
@@ -54,7 +54,8 @@ public class Worker {
         int len = task.length();
         String numStr = task.substring(len - 1, len);
         int num = Integer.parseInt(numStr);
-        if (num > 0 && num % 2 == 0) {
+        int modNum = 2;
+        if (num > 0 && num % modNum == 0) {
             SleepUtil.secondSleep(4L);
         }
     }
