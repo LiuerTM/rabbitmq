@@ -7,9 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Mingの
  */
 @SpringBootApplication
-public class RabbitMQBootApplication {
+public class RabbitMqBootApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RabbitMQBootApplication.class, args);
+        SpringApplication.run(RabbitMqBootApplication.class, args);
     }
 }

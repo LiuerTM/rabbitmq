@@ -3,7 +3,7 @@ package ind.liuer.rabbitmq.boot.constant;
 /**
  * @author Mingの
  */
-public class RabbitConstant {
+public class RabbitMqConstant {
 
     public static final String DELAYED_EXCHANGE_TYPE = "x-delayed-message";
 

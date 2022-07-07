@@ -1,0 +1,4 @@
+server:
+  port: 6464
+  servlet:
+    context-path: /rabbitmq
